@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import dill
 from sklearn.metrics import r2_score
+from sklearn.model_selection import GridSearchCV
 
 # Add the root directory of your project to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -20,14 +21,18 @@ def save_object(file_path, obj):
     except Exception as e:
         raise CustomException(e, sys)
 
-def evaluate_models(X_train, y_train, x_test, y_test, models):
+def evaluate_models(X_train, y_train, x_test, y_test, models, params):
     try:
         report = {}
 
         for i in range(len(list(models))):
             model = list(models.values())[i]
+            param = params(list(model.keys()))[i]
 
-            model.fit(X_train, y_train) 
+            gs = GridSearchCV(model, param, cv=3)
+            gs.fit(X_train, y_train)
+
+            #model.fit(X_train, y_train) 
             y_train_pred = model.predict(X_train)
             y_test_pred = model.predict(x_test)
 
